@@ -406,7 +406,9 @@ webosTvAccessory.prototype.setState = function(state, callback) {
                 setTimeout(this.checkWakeOnLan.bind(this, callback), 5000);
             })
         } else {
-            callback(null, true);
+            // callback(null, true);
+            // Pretty sure callback doesn't take the new value.  Error is omitted in the example.
+            callback();
         }
     } else {
         if (this.connected) {
@@ -416,10 +418,11 @@ webosTvAccessory.prototype.setState = function(state, callback) {
                 this.connected = false;
                 this.setMuteStateManually(null, false);
                 this.setAppSwitchManually(null, false, null);
-                callback(null, true);
+                callback();
             })
         } else {
-            callback(new Error('webOS - is not connected'))
+            // TV is off, we want to turn it off, that's a win.
+            callback();
         }
     }
 };
@@ -434,8 +437,12 @@ webosTvAccessory.prototype.setMuteState = function(state, callback) {
         this.lgtv.request('ssap://audio/setMute', {
             mute: !state
         });
-        callback(null, state);
+        callback();
+    } else if (!state) {
+        // TV is off, call it muted.
+        callback();
     } else {
+        // Don't want to turn on the TV and unmute if TV is off.
         callback(new Error('webOS - is not connected'))
     }
 };
